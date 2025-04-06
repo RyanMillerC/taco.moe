@@ -9,46 +9,46 @@ import (
 
 // statusResponseWriter wraps http.ResponseWriter to capture the status code.
 type statusResponseWriter struct {
-  http.ResponseWriter
-  statusCode int
+        http.ResponseWriter
+        statusCode int
 }
 
 // WriteHeader captures the status code and calls the underlying WriteHeader.
 func (w *statusResponseWriter) WriteHeader(code int) {
-  w.statusCode = code
-  w.ResponseWriter.WriteHeader(code)
+        w.statusCode = code
+        w.ResponseWriter.WriteHeader(code)
 }
 
 // Log http requests to stdout
 func loggingHandler(next http.Handler) http.Handler {
-  return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-    // Wrap the ResponseWriter to capture the status code.
-    sw := &statusResponseWriter{ResponseWriter: w, statusCode: 200} // default to 200 if WriteHeader is not called
-
-    // Process the request.
-    next.ServeHTTP(sw, r)
-
-    // Log the details.
-    log.Printf(
-      "%s \"%s %s\" %d \"%s\" \"%s\"",
-      getIP(r),                   // Remote IP (with proxy support)
-      r.Method,                   // HTTP Method
-      r.URL.RequestURI(),         // Full URL with query params
-      sw.statusCode,              // HTTP Status Code
-      r.Header.Get("User-Agent"), // User Agent
-      r.Referer(),                // Referrer
-    )
-  })
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Wrap the ResponseWriter to capture the status code.
+		sw := &statusResponseWriter{ResponseWriter: w, statusCode: 200} // default to 200 if WriteHeader is not called
+		
+		// Process the request.
+		next.ServeHTTP(sw, r)
+		
+		// Log the details.
+		log.Printf(
+			"%s \"%s %s\" %d \"%s\" \"%s\"",
+			getIP(r),                   // Remote IP (with proxy support)
+			r.Method,                   // HTTP Method
+			r.URL.RequestURI(),         // Full URL with query params
+			sw.statusCode,              // HTTP Status Code
+			r.Header.Get("User-Agent"), // User Agent
+			r.Referer(),                // Referrer
+		)
+	})
 }
 
 // Get http.Request IP from X-Forwarded-For header if it exists. Otherwise,
 // fall back to RemoteAddr
 func getIP(r *http.Request) string {
-  xff := r.Header.Get("X-Forwarded-For")
-  if xff != "" {
-    return xff
-  }
-  return r.RemoteAddr
+	xff := r.Header.Get("X-Forwarded-For")
+	if xff != "" {
+		return xff
+	}
+	return r.RemoteAddr
 }
 
 // validTokens holds the allowed tokens as a set.
