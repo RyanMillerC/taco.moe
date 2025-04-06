@@ -1,0 +1,31 @@
+# Stage 1: Build the Go application
+FROM golang:1.20 AS builder
+WORKDIR /app
+
+# Ensure the binary is statically linked
+ENV CGO_ENABLED=0
+
+# Copy go.mod and go.sum and download dependencies
+COPY go.mod ./
+RUN go mod download
+
+# Copy the source code
+COPY . .
+
+# Build the application. The -a flag forces rebuilding of packages, and -installsuffix cgo ensures static linking.
+RUN go build -a -installsuffix cgo -o myapp .
+
+# Stage 2: Package into a scratch image
+FROM scratch
+WORKDIR /app
+
+# Copy the binary and static files from the builder stage.
+COPY --from=builder /app/myapp .
+COPY --from=builder /app/site ./site
+COPY --from=builder /app/protected ./protected
+
+# Expose port 5000
+EXPOSE 5000
+
+# Command to run the application
+CMD ["./myapp"]
