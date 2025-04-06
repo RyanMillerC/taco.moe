@@ -22,7 +22,7 @@ WORKDIR /app
 # Copy the binary and static files from the builder stage.
 COPY --from=builder /app/myapp .
 COPY --from=builder /app/site ./site
-COPY --from=builder /app/protected ./protected
+COPY --from=builder /app/personal-user-manual ./personal-user-manual
 
 # Expose port 5000
 EXPOSE 5000

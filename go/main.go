@@ -73,7 +73,7 @@ func protectedHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Forbidden", http.StatusForbidden)
 		return
 	}
-	http.ServeFile(w, r, "protected/secret.html")
+	http.ServeFile(w, r, "personal-user-manual/index.html")
 }
 
 func main() {
@@ -81,7 +81,7 @@ func main() {
 	loadValidTokens()
 
 	// Handle the protected page
-	http.HandleFunc("/protected", protectedHandler)
+	http.HandleFunc("/pum", protectedHandler)
 
 	// Serve static files from the "site" directory for the unprotected Jekyll site.
 	fs := http.FileServer(http.Dir("site"))
